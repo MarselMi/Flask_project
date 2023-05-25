@@ -1,8 +1,10 @@
 from flask import Flask, render_template
-from blog.views.users import users_app
-from blog.views.auth import auth_app, login_manager
-from blog.views.articles import articles_app
-from blog.models.database import db
+from .views.users import users_app
+from .views.auth import auth_app, login_manager
+from .views.articles import articles_app
+from .models.database import db
+from flask_migrate import Migrate
+import os
 
 
 app = Flask(__name__)
@@ -14,6 +16,9 @@ login_manager.init_app(app)
 app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/blog.db"
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 db.init_app(app)
+cfg_name = os.environ.get("CONFIG_NAME") or "ProductionConfig"
+app.config.from_object(f"blog.configs.{cfg_name}")
+migrate = Migrate(app, db, compare_type=True)
 
 
 @app.route("/")
