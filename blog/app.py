@@ -1,53 +1,40 @@
-from flask import Flask, render_template
-from .views.users import users_app
-from .views.auth import auth_app, login_manager
-from .views.articles import articles_app
-from .models.database import db
-from flask_migrate import Migrate
-import os
+from flask import Flask
+
+from blog import commands
+from blog.extensions import db, login_manager, migrate, csrf
+from blog.models import User
 
 
-app = Flask(__name__)
-app.register_blueprint(users_app, url_prefix="/users")
-app.register_blueprint(articles_app, url_prefix="/articles")
-app.config["SECRET_KEY"] = "abcdefg123456"
-app.register_blueprint(auth_app, url_prefix="/auth")
-login_manager.init_app(app)
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:////tmp/blog.db"
-app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
-db.init_app(app)
-cfg_name = os.environ.get("CONFIG_NAME") or "ProductionConfig"
-app.config.from_object(f"blog.configs.{cfg_name}")
-migrate = Migrate(app, db, compare_type=True)
+def create_app() -> Flask:
+    app = Flask(__name__)
+    app.config.from_object('blog.config')
+
+    register_extensions(app)
+    register_blueprints(app)
+    register_commands(app)
+    return app
 
 
-@app.route("/")
-def index():
-    return render_template("index.html")
+def register_extensions(app):
+    db.init_app(app)
+    migrate.init_app(app, db, compare_type=True)
+    csrf.init_app(app)
+
+    login_manager.login_view = 'auth.login'
+    login_manager.init_app(app)
+
+    @login_manager.user_loader
+    def load_user(user_id):
+        return User.query.get(int(user_id))
 
 
-@app.cli.command("init-db")
-def init_db():
-    """
-    Run in your terminal:
-    flask init-db
-    """
-    db.create_all()
-    print("done!")
+def register_blueprints(app: Flask):
+    from blog.auth.views import auth
+    from blog.user.views import user
+
+    app.register_blueprint(user)
+    app.register_blueprint(auth)
 
 
-@app.cli.command("create-users")
-def create_users():
-    """
-    Run in your terminal:
-    flask create-users
-    > done! created users: <User #1 'admin'> <User #2 'james'>
-    """
-    from blog.models import User
-    admin = User(username="administrator", is_staff=True)
-    james = User(username="jameson")
-    db.session.add(admin)
-    db.session.add(james)
-    db.session.commit()
-    print("done! created users:", admin, james)
-
+def register_commands(app: Flask):
+    app.cli.add_command(commands.create_init_user)

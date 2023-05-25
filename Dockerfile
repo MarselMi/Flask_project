@@ -1,13 +1,13 @@
-FROM python:3.9.1-buster
+FROM python:3.8.10-buster
 
 WORKDIR /app
 
 COPY requirements.txt requirements.txt
-RUN pip install -r requirements.txt
 
-COPY wsgi.py wsgi.py
-COPY blog ./blog
+RUN pip install --no-cache --user -r requirements.txt
+
+COPY . .
 
 EXPOSE 5000
 
-CMD ["python", "wsgi.py"]
+CMD ["python3", "-m" , "flask", "run", "--host=0.0.0.0"]
