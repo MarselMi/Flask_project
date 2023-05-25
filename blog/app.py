@@ -1,8 +1,8 @@
 from flask import Flask
-
-from blog import commands
-from blog.extensions import db, login_manager, migrate, csrf
-from blog.models import User
+import commands
+from extensions import db, login_manager, migrate, csrf
+from models import User
+from security import flask_bcrypt
 
 
 def create_app() -> Flask:
@@ -12,6 +12,7 @@ def create_app() -> Flask:
     register_extensions(app)
     register_blueprints(app)
     register_commands(app)
+    flask_bcrypt.init_app(app)
     return app
 
 
@@ -29,8 +30,8 @@ def register_extensions(app):
 
 
 def register_blueprints(app: Flask):
-    from blog.auth.views import auth
-    from blog.user.views import user
+    from auth.views import auth
+    from user.views import user
 
     app.register_blueprint(user)
     app.register_blueprint(auth)
