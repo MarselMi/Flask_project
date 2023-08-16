@@ -4,6 +4,7 @@ from extensions import db, login_manager, migrate, csrf
 from models import User
 from security import flask_bcrypt
 from blog.views.authors import authors_app
+from blog.admin import admin
 
 
 def create_app() -> Flask:
@@ -19,6 +20,7 @@ def create_app() -> Flask:
 
 def register_extensions(app):
     db.init_app(app)
+    admin.init_app(app)
     migrate.init_app(app, db, compare_type=True)
     csrf.init_app(app)
 
