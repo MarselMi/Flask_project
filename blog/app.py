@@ -41,3 +41,23 @@ def register_blueprints(app: Flask):
 
 def register_commands(app: Flask):
     app.cli.add_command(commands.create_init_user)
+
+
+@app.cli.command("create-tags")
+def create_tags():
+    """
+    Run in your terminal:
+    ➜ flask create-tags
+    """
+    from blog.models import Tag
+    for name in [
+        "flask",
+        "django",
+        "python",
+        "sqlalchemy",
+        "news",
+    ]:
+        tag = Tag(name=name)
+        db.session.add(tag)
+    db.session.commit()
+    print("created tags")
