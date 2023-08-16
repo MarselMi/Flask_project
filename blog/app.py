@@ -5,6 +5,7 @@ from models import User
 from security import flask_bcrypt
 from blog.views.authors import authors_app
 from blog.admin import admin
+from blog.api import init_api
 
 
 def create_app() -> Flask:
@@ -27,6 +28,8 @@ def register_extensions(app):
     login_manager.login_view = 'auth.login'
     login_manager.init_app(app)
 
+    api = init_api(app)
+    
     @login_manager.user_loader
     def load_user(user_id):
         return User.query.get(int(user_id))
