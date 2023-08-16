@@ -17,6 +17,8 @@
     {% block body %}{% endblock %}
 </div>
 
+{% for (endpoint, label) in [('users_app.list', 'Users'), ('articles_app.list', 'Articles'), ('authors_app.list', 'Authors'),] %}
+
 {% block js %}
     <script src="{{ url_for('static', filename='js/bootstrap.bundle.min.js') }}"></script>
 {% endblock %}

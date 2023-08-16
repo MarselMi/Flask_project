@@ -3,6 +3,7 @@ import commands
 from extensions import db, login_manager, migrate, csrf
 from models import User
 from security import flask_bcrypt
+from blog.views.authors import authors_app
 
 
 def create_app() -> Flask:
@@ -35,6 +36,7 @@ def register_blueprints(app: Flask):
 
     app.register_blueprint(user)
     app.register_blueprint(auth)
+    app.register_blueprint(authors_app, url_prefix="/authors")
 
 
 def register_commands(app: Flask):
